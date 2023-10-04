@@ -16,7 +16,7 @@ void *thread_function(void *arg)
 
         clock_gettime(CLOCK_MONOTONIC, &start_time);
         volatile unsigned long long j;
-        for (j=0; j < 42000000ULL; j++)
+        for (j=0; j < 40000000ULL; j++)
 
         clock_gettime(CLOCK_MONOTONIC, &current_time);
         double elapsed = (current_time.tv_sec - start_time.tv_sec) + (current_time.tv_nsec - start_time.tv_nsec) / 1e9;
