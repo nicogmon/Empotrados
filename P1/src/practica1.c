@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include <time.h>
 
-#define MAX_THREADS 1
+#define MAX_THREADS 4
 
 
 typedef struct {
@@ -42,7 +42,7 @@ void *thread_function(void *arg)
         usleep((0.9 - elapsed) * 1000000);
         clock_gettime(CLOCK_REALTIME, &current_time);
         elapsed = (current_time.tv_sec - start_time.tv_sec) + (current_time.tv_nsec - start_time.tv_nsec) / 1e9;
-        printf("Thread %lu - Iteracion %d: tiempo iteracion= %.9f s.\n", pthread_self(), i, elapsed );
+        //printf("Thread %lu - Iteracion %d: tiempo iteracion= %.9f s.\n", pthread_self(), i, elapsed );
 
     }
     free(args);
