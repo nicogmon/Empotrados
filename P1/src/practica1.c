@@ -26,23 +26,26 @@ void *thread_function(void *arg)
        
 
         volatile unsigned long long j;
-        for (j=0; j < 42000000ULL; j++)
+
+        for (j=0; j < 32000000ULL; j++)
         
         clock_gettime(CLOCK_REALTIME, &current_time);
         
         double epoch = start_time.tv_sec + start_time.tv_nsec / 1e9;
-        double elapsed = (current_time.tv_sec - start_time.tv_sec) + (current_time.tv_nsec - start_time.tv_nsec) / 1e9;
+
+        double elapsed = (current_time.tv_sec  + (current_time.tv_nsec / 1e9)) - (start_time.tv_sec +  (start_time.tv_nsec / 1e9));
 
         printf("[%.9f]Thread %d - Iteracion %d: Coste= %.9f s.", epoch, args->id, i, elapsed );
 
         if (elapsed > 0.9){
-            printf("(fallo temporal)");
+            printf("(fallo temporal)\n");
+            continue;
         }
         printf("\n");
-        //printf("%f\n", 0.9-elapsed);
+        printf("%f\n", 0.9-elapsed);
         usleep((0.9 - elapsed) * 1000000);
         clock_gettime(CLOCK_REALTIME, &current_time);
-        elapsed = (current_time.tv_sec - start_time.tv_sec) + (current_time.tv_nsec - start_time.tv_nsec) / 1e9;
+        elapsed = (current_time.tv_sec  + (current_time.tv_nsec / 1e9)) - (start_time.tv_sec +  (start_time.tv_nsec / 1e9));
         //printf("Thread %lu - Iteracion %d: tiempo iteracion= %.9f s.\n", pthread_self(), i, elapsed );
 
     }
