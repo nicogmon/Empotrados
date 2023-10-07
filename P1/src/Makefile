@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I -Wall -Wshadow -lpthread
+CFLAGS=-I -Wall -Wshadow -pthread
 DEPS = 
 
 %.o: %.c $(DEPS)
@@ -8,4 +8,4 @@ DEPS =
 practica1: practica1.o
 	gcc -o practica1 practica1.o	
 clean:
-	rm -f *.o practica1
+	rm -f *.o practica1 ./-lpthread

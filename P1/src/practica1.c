@@ -17,7 +17,7 @@ void *thread_function(void *arg)
     ThreadArgs *args = (ThreadArgs *)arg;
 
     for (int i = 1; i < 6; i++){
-        time_t epoch_time;
+        
         struct timespec start_time, current_time;
         
 
@@ -29,6 +29,7 @@ void *thread_function(void *arg)
         for (j=0; j < 42000000ULL; j++)
         
         clock_gettime(CLOCK_REALTIME, &current_time);
+        
         double epoch = start_time.tv_sec + start_time.tv_nsec / 1e9;
         double elapsed = (current_time.tv_sec - start_time.tv_sec) + (current_time.tv_nsec - start_time.tv_nsec) / 1e9;
 
