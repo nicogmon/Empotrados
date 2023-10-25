@@ -74,7 +74,8 @@ void * thread_actions(void * arg){
         clock_gettime(CLOCK_MONOTONIC, &start_time);
         usleep(USLEEP_TMP);
         clock_gettime(CLOCK_MONOTONIC, &current_time);
-        elapsed = (current_time.tv_sec  + (current_time.tv_nsec / 1e9)) - (start_time.tv_sec +  (start_time.tv_nsec / 1e9)) - (USLEEP_TMP/1e6);
+        elapsed = ((current_time.tv_sec  + (current_time.tv_nsec / 1e9)) - (start_time.tv_sec +  (start_time.tv_nsec / 1e9))) - (USLEEP_TMP/1e6);
+        elapsed = elapsed * 1e9;
         //printf("elapsed = %.9f\n", elapsed);
         iteracion = num_medidas/2;
         threadinfo->medidas [num_medidas] = iteracion;
@@ -96,7 +97,7 @@ void * thread_actions(void * arg){
 
     }
     threadinfo->latencia_media = tmp_total / num_medidas;
-    printf("[%d] - latencia media = %.9f s. | max = %.9f\n", *cpu, threadinfo->latencia_media, threadinfo->latencia_max);
+    printf("[%d] - latencia media = %d ns. | max = %d\n", *cpu, (int) threadinfo->latencia_media, (int) threadinfo->latencia_max);
 
     //medias[*cpu] = tmp_total / num_medidas;
     //printf("medias en thread [%d] = %.9f\n", *cpu, medias[*cpu]);
@@ -144,7 +145,7 @@ main(int argc, char *argv[])
         //Escribe las medidas en el archivo CSV
         while(threadinfo->medidas[z+1] != 0){
             //printf("medida %d = %.9f s.\n", (int) threadinfo->medidas[z], threadinfo->medidas[z+1]);
-            fprintf(csv_file, "%d, %d, %.9f\n", threadinfo->cpu, (int)  threadinfo->medidas[z], threadinfo->medidas[z+1]);
+            fprintf(csv_file, "%d, %d, %d\n", threadinfo->cpu, (int)  threadinfo->medidas[z], (int) threadinfo->medidas[z+1]);
             z += 2;
         }
         latencia_med_sum += threadinfo->latencia_media;
@@ -155,7 +156,7 @@ main(int argc, char *argv[])
         free(threadinfo);
     }
     latencia_med_total = latencia_med_sum / N;
-    printf("\nTotal Latencia media  = %.9f s | max = %.9f.\n", latencia_med_total, max_total);
+    printf("\nTotal Latencia media  = %d ns | max = %d ns.\n", (int) latencia_med_total, (int) max_total);
 
     // Cierra el archivo CSV
     fclose(csv_file);
