@@ -8,4 +8,4 @@ DEPS =
 cyclictestURJC: cyclictestURJC.o
 	gcc -o cyclictestURJC cyclictestURJC.o	
 clean:
-	rm -f *.o cyclictestURJC ./-lpthread
+	rm -f *.o cyclictestURJC ./-lpthread cyclictestURJC.csv

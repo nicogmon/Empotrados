@@ -69,7 +69,7 @@ void * thread_actions(void * arg){
 
     //printf("Thread %d\n", *cpu);
     threadinfo->cpu = *cpu;
-    while((current_time.tv_sec - timer_start.tv_sec) < 10){
+    while((current_time.tv_sec - timer_start.tv_sec) < 60){
         
         clock_gettime(CLOCK_MONOTONIC, &start_time);
         usleep(USLEEP_TMP);
