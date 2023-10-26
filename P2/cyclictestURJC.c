@@ -10,10 +10,11 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 #define N ((int) sysconf(_SC_NPROCESSORS_ONLN))
-#define MAX_MEDIDAS 100000
-#define USLEEP_TMP 5000
+#define MAX_MEDIDAS 10000000
+#define USLEEP_TMP 500
 double medias[20] = {0};
 double max_latencias[21] = {0};
 FILE *csv_file;
@@ -26,6 +27,7 @@ struct Threadinfo{
 
 };typedef struct Threadinfo Threadinfo;
 
+Threadinfo *threadinfo_ptrs[30];
 
 void * thread_actions(void * arg){
     int num_medidas = 0;
@@ -35,7 +37,7 @@ void * thread_actions(void * arg){
     double elapsed;
 
     Threadinfo * threadinfo = (Threadinfo *) malloc(sizeof(Threadinfo));
-    threadinfo->medidas = (double *) malloc(sizeof(double) * MAX_MEDIDAS);
+    threadinfo->medidas = (double *) malloc(sizeof(double) * MAX_MEDIDAS * 2);
     memset(threadinfo->medidas, 0, MAX_MEDIDAS * sizeof(double));
     threadinfo->latencia_media = 0;
     threadinfo->latencia_max = 0;
@@ -74,7 +76,7 @@ void * thread_actions(void * arg){
         clock_gettime(CLOCK_MONOTONIC, &start_time);
         usleep(USLEEP_TMP);
         clock_gettime(CLOCK_MONOTONIC, &current_time);
-        elapsed = ((current_time.tv_sec  + (current_time.tv_nsec / 1e9)) - (start_time.tv_sec +  (start_time.tv_nsec / 1e9))) - (USLEEP_TMP/1e6);
+        elapsed = (current_time.tv_sec  + (current_time.tv_nsec / 1e9)) - (start_time.tv_sec +  (start_time.tv_nsec / 1e9)) - (USLEEP_TMP/1e6);
         elapsed = elapsed * 1e9;
         //printf("elapsed = %.9f\n", elapsed);
         iteracion = num_medidas/2;
@@ -85,7 +87,7 @@ void * thread_actions(void * arg){
             threadinfo->latencia_max = elapsed;
         }
 
-        if (num_medidas == MAX_MEDIDAS){   
+        if (num_medidas == MAX_MEDIDAS * 2){   
             printf("Error: demasiadas medidas\n");
             break;
         }
@@ -97,7 +99,7 @@ void * thread_actions(void * arg){
 
     }
     threadinfo->latencia_media = tmp_total / num_medidas;
-    printf("[%d] - latencia media = %d ns. | max = %d\n", *cpu, (int) threadinfo->latencia_media, (int) threadinfo->latencia_max);
+    printf("[%d] - latencia media = %.0f ns. | max = %.0f\n", *cpu,  threadinfo->latencia_media,  threadinfo->latencia_max);
 
     //medias[*cpu] = tmp_total / num_medidas;
     //printf("medias en thread [%d] = %.9f\n", *cpu, medias[*cpu]);
@@ -118,6 +120,7 @@ main(int argc, char *argv[])
     static int32_t latency_target_value = 0;
     int latency_target_fd = open("/dev/cpu_dma_latency", O_RDWR);
     write(latency_target_fd, &latency_target_value, 4);
+    
     
     umask(0);
     csv_file = fopen("cyclictestURJC.csv", "a+");
@@ -142,22 +145,35 @@ main(int argc, char *argv[])
         Threadinfo * threadinfo;
         int z = 0;        
         pthread_join(pthread_ids[i], (void **) &threadinfo);
+        threadinfo_ptrs[i] = threadinfo;
+        
+        //free(threadinfo->medidas);
+        //free(threadinfo);
+    }
+
+    
+    for(int i = 0; i < N; i++){
+        int z = 0; 
+        //fprintf(stderr,"iteracion %d\n", i);
+        //fprintf(stderr, "cpu %d\n", threadinfo_ptrs[i]->cpu);
         //Escribe las medidas en el archivo CSV
-        while(threadinfo->medidas[z+1] != 0){
-            //printf("medida %d = %.9f s.\n", (int) threadinfo->medidas[z], threadinfo->medidas[z+1]);
-            fprintf(csv_file, "%d, %d, %d\n", threadinfo->cpu, (int)  threadinfo->medidas[z], (int) threadinfo->medidas[z+1]);
+        while(threadinfo_ptrs[i]->medidas[z+1] != 0){
+            fprintf(csv_file, "%d, %d, %.0f\n", threadinfo_ptrs[i]->cpu, (int)  threadinfo_ptrs[i]->medidas[z],  floor(threadinfo_ptrs[i]->medidas[z+1]));
             z += 2;
         }
-        latencia_med_sum += threadinfo->latencia_media;
-        if (max_total < threadinfo->latencia_max){
-            max_total = threadinfo->latencia_max;
+        latencia_med_sum += threadinfo_ptrs[i]->latencia_media;
+        if (max_total < threadinfo_ptrs[i]->latencia_max){
+            max_total = threadinfo_ptrs[i]->latencia_max;
         }
-        free(threadinfo->medidas);
-        free(threadinfo);
+        
     }
+    
     latencia_med_total = latencia_med_sum / N;
-    printf("\nTotal Latencia media  = %d ns | max = %d ns.\n", (int) latencia_med_total, (int) max_total);
-
+    printf("\nTotal Latencia media  = %d ns | max = %.0f s.\n", (int) latencia_med_total,  max_total );
+    for (int i = 0; i < N; i++){
+        free(threadinfo_ptrs[i]->medidas);
+        free(threadinfo_ptrs[i]);
+    }
     // Cierra el archivo CSV
     fclose(csv_file);
 }
