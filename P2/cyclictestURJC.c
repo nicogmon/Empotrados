@@ -19,6 +19,7 @@ double medias[20] = {0};
 double max_latencias[21] = {0};
 FILE *csv_file;
 
+
 struct Threadinfo{
     double latencia_media;
     double latencia_max;
@@ -71,7 +72,7 @@ void * thread_actions(void * arg){
 
     //printf("Thread %d\n", *cpu);
     threadinfo->cpu = *cpu;
-    while((current_time.tv_sec - timer_start.tv_sec) < 60){
+    while((current_time.tv_sec - timer_start.tv_sec) < 10){
         
         clock_gettime(CLOCK_MONOTONIC, &start_time);
         usleep(USLEEP_TMP);
@@ -98,7 +99,7 @@ void * thread_actions(void * arg){
         num_medidas += 2;
 
     }
-    threadinfo->latencia_media = tmp_total / num_medidas;
+    threadinfo->latencia_media = tmp_total / (num_medidas / 2);
     printf("[%d] - latencia media = %.0f ns. | max = %.0f\n", *cpu,  threadinfo->latencia_media,  threadinfo->latencia_max);
 
     //medias[*cpu] = tmp_total / num_medidas;
@@ -157,8 +158,9 @@ main(int argc, char *argv[])
         //fprintf(stderr,"iteracion %d\n", i);
         //fprintf(stderr, "cpu %d\n", threadinfo_ptrs[i]->cpu);
         //Escribe las medidas en el archivo CSV
+        //fprintf(csv_file, "cpu, iteracion, latencia\n");
         while(threadinfo_ptrs[i]->medidas[z+1] != 0){
-            fprintf(csv_file, "%d, %d, %.0f\n", threadinfo_ptrs[i]->cpu, (int)  threadinfo_ptrs[i]->medidas[z],  floor(threadinfo_ptrs[i]->medidas[z+1]));
+            fprintf(csv_file, "%d, %d, %.5f\n", threadinfo_ptrs[i]->cpu, (int)  threadinfo_ptrs[i]->medidas[z],  (threadinfo_ptrs[i]->medidas[z+1] / 1e3 ));
             z += 2;
         }
         latencia_med_sum += threadinfo_ptrs[i]->latencia_media;
