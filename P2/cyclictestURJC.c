@@ -14,7 +14,7 @@
 
 #define N ((int) sysconf(_SC_NPROCESSORS_ONLN))
 #define MAX_MEDIDAS 10000000
-#define USLEEP_TMP 500
+#define USLEEP_TMP 50000
 double medias[20] = {0};
 double max_latencias[21] = {0};
 FILE *csv_file;
@@ -72,7 +72,7 @@ void * thread_actions(void * arg){
 
     //printf("Thread %d\n", *cpu);
     threadinfo->cpu = *cpu;
-    while((current_time.tv_sec - timer_start.tv_sec) < 10){
+    while((current_time.tv_sec - timer_start.tv_sec) < 60){
         
         clock_gettime(CLOCK_MONOTONIC, &start_time);
         usleep(USLEEP_TMP);
