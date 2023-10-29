@@ -14,22 +14,22 @@ latency3 = pd.read_csv("R_NRT_E3cyclictestURJC.csv", usecols=[2], header=None, n
 
 
 # Definir los límites para el histograma
-bin_limits = np.arange(min(latency1), max(latency3) + 0.01, 0.01)
+bin_limits = np.arange(min(latency1), max(latency3) + 0.03, 0.03)
 
 fig, ax = plt.subplots(figsize=(8, 6))
 
 # Crear los histogramas
-ax.hist(latency1, bins=bin_limits, color='blue', alpha=0.4, label='Idle')
-ax.hist(latency2, bins=bin_limits, color='green', alpha=0.4, label='Hackbench')
+ax.hist(latency1, bins=bin_limits, color='blue', alpha=0.5, label='Idle')
+ax.hist(latency2, bins=bin_limits, color='green', alpha=0.5, label='Hackbench')
 ax.hist(latency3, bins=bin_limits, color='red', alpha=0.4, label='Bonnie')
 
 # Leyenda, título y etiquetas de los ejes
 ax.legend()
-ax.set_title('Raspberry Real Time')
-ax.set_xlabel('Latencia')
-ax.set_ylabel('Frecuencia')
+ax.set_title('Raspberry No Real Time')
+ax.set_xlabel('Latencia (microsegundos)')
+ax.set_ylabel('Frecuencia ')
 
 # Mostrar el histograma
-plt.xlim(0, 8)
+#plt.xlim(0, 8)
 plt.show()
 
